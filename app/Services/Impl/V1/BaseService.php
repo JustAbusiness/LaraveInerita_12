@@ -6,7 +6,8 @@ use App\Services\Interfaces\BaseServiceInteface;
 
 class BaseService implements BaseServiceInteface
 {
-    public function __construct() 
+    public function __construct()
     {
+        
     }
 }
