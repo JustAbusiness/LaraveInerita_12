@@ -13,7 +13,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, User2 } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,6 +22,21 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'QL Thành Viên',
+        href: '/user',
+        icon: User2,
+        items: [
+            {
+                title: 'Nhóm Thành Viên',
+                url: '/user_catalogue ',
+            },
+            {
+                title: 'Thành Viên',
+                url: '/user',
+            },
+        ],
+    }, 
 ];
 
 const footerNavItems: NavItem[] = [
@@ -33,6 +48,11 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#react',
+        icon: BookOpen,
+    },
+    {
+        title: 'Support',
+        href: 'https://l aravel.com/docs/starter-kits#react',
         icon: BookOpen,
     },
 ];

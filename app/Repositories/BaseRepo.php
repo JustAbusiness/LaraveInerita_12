@@ -2,6 +2,13 @@
 
 namespace App\Repositories;
 
-class BaseRepo {
-    
+class BaseRepo
+{
+    protected $model;
+
+    public function __construct($model)
+    {
+        $this->model = $model;
+    } 
+
 }
