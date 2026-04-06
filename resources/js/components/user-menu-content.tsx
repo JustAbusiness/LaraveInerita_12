@@ -49,13 +49,13 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                 <Link
-                    className="block w-full"
+                    className="block w-full text-destructive focus:bg-destructive/10 focus:text-destructive group"
                     href={logout()}
                     as="button"
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
-                    <LogOut className="mr-2" />
+                    <LogOut className="mr-2 size-4 transition-transform group-hover:-translate-x-0.5" />
                     Log out
                 </Link>
             </DropdownMenuItem>

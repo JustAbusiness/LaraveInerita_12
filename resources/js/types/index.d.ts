@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
+import z from 'zod';
 
 export interface Auth {
     user: User;
@@ -46,4 +47,9 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface PageConfig<TFormValues>  {
+    schema: z.ZodSchema<TFormValues>
+    heading: string
 }

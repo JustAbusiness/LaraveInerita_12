@@ -9,7 +9,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
     {
-        title: 'Quản lý nhóm thành viên',
+        title: 'Thêm mới  nhóm thành viên',
         href: '/',
     },
 ];
@@ -18,8 +18,8 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={ breadcrumbs}>
             <Head title="Quản lý nhóm thành viên" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                Quản lý nhóm thành viên
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl">
+                Thêm mới
             </div>
         </AppLayout>
     );

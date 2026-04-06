@@ -141,3 +141,21 @@
         @apply bg-background text-foreground;
     }
 }
+
+.custom-breadcrumb li + li:before {
+    content: '/';
+    padding: 0 5px;
+    color: #000;
+}
+
+.custom-breadcrumb li:last-child > * {
+    font-weight: 600;
+}
+
+.page-wrapper {
+     background: #f3f3f4;
+}
+
+.page-container {
+    padding: 20px;
+}

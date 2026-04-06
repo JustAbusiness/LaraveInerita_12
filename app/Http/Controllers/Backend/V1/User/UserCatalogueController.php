@@ -14,10 +14,14 @@ class UserCatalogueController extends BaseController
         parent::__construct();
     }
 
-     public function index(): Response
-     {
+    public function index(): Response
+    {
         return Inertia::render('user/user_catalogue/index');
     }
 
+    public function create(): Response
+    {
+        return Inertia::render('user/user_catalogue/save');
+    }
 
 }
