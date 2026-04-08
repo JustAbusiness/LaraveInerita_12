@@ -1,23 +1,17 @@
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import CustomCard from '@/components/ui/custom-card';
 import CustomNotice from '@/components/ui/custom-notice';
 import CustomPageHeading from '@/components/ui/customer-page-heading';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
+import user_catalogue from '@/routes/user_catalogue';
 import { type BreadcrumbItem, type PageConfig } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Head } from '@inertiajs/react';
-import { useForm } from 'react-hook-form';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
 import * as z from 'zod';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -47,15 +41,6 @@ const pageConfig: PageConfig<TFormValues> = {
 };
 
 export default function UserCatalogueSave() {
-    const form = useForm<TFormValues>({
-        resolver: zodResolver(schema),
-        defaultValues: {
-            name: '',
-            canonical: '',
-            description: '',
-        },
-    });
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={pageConfig.heading} />
@@ -70,73 +55,84 @@ export default function UserCatalogueSave() {
                             <CustomNotice />
                         </div>
                         <div className="col-span-7">
-                            <Form {...form}>
-                                <CustomCard
-                                    isShowHeader={true}
-                                    title="Thông tin chung"
-                                    description="Nhập đầy đủ các thông tin dưới đây"
-                                >
-                                    <div className="mb-[20px] grid grid-cols-2 gap-4">
-                                        <div className="col-span-1">
-                                            <FormField
-                                                control={form.control}
-                                                name="name"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Tên nhóm thành viên
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                {...field}
-                                                                className="form-input"
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            ></FormField>
-                                        </div>
-                                        <div className="col-span-1">
-                                            <FormField
-                                                control={form.control}
-                                                name="canonical"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Từ khoá nhóm
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                {...field}
-                                                                className="form-input"
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            ></FormField>
-                                        </div>
-                                    </div>
-                                    <FormField
-                                        control={form.control}
-                                        name="description"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Mô tả</FormLabel>
-                                                <FormControl>
-                                                    <Textarea {...field} className='h-[168px]' />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem> 
-                                        )}
-                                    ></FormField>
-                                    <div className='mt-[20px]'>
-                                        <Button className='bg-[#17b9] rounded-[5px] font-light cursor-pointer'>
-                                            Lưu lại
-                                        </Button>
-                                    </div>
-                                </CustomCard>
+                            <Form action={user_catalogue.store()} method="post">
+                                {({ processing, errors }) => (
+                                    <>
+                                        <CustomCard
+                                            isShowHeader={true}
+                                            title="Thông tin chung"
+                                            description="Nhập đầy đủ các thông tin dưới đây"
+                                        >
+                                            <div className="mb-[20px] grid grid-cols-2 gap-4">
+                                                <div className="col-span-1">
+                                                    <Label htmlFor='name' className="mb-[10px]">
+                                                        Tên nhóm thông viên
+                                                    </Label>
+                                                    <Input
+                                                        id="name"
+                                                        type="text"
+                                                        tabIndex={1}
+                                                        name="name"
+                                                        autoFocus
+                                                        autoComplete="name"
+                                                        placeholder=""
+                                                        className="mt-1 block w-full"
+                                                    />
+                                                    <InputError
+                                                        message={errors.name}
+                                                        className='mt-[5px]'
+                                                    /> 
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <Label htmlFor='canonical' className="mb-[10px]">
+                                                        Từ khoá
+                                                    </Label>
+                                                    <Input
+                                                        id="canonical"
+                                                        type="text"
+                                                        tabIndex={1}
+                                                        name="canonical"
+                                                        autoFocus
+                                                        autoComplete=""
+                                                        placeholder=""
+                                                        className="mt-1 block w-full"
+                                                    />
+                                                    <InputError
+                                                        message={errors.canonical}
+                                                        className='mt-[5px]'
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor='description' className="mb-[10px]">
+                                                    Mô tả ngắn
+                                                </Label>
+                                                <Textarea
+                                                    name="description"
+                                                    className='h-[168px]'
+                                                    autoFocus
+                                                    tabIndex={1}
+                                                    autoComplete=''
+                                                    placeholder=''
+                                                />
+                                            </div>
+
+                                            <div className="mt-[20px]">
+                                                <Button
+                                                    type="submit"
+                                                    tabIndex={4}
+                                                    disabled={processing}
+                                                    className="w-[150px] cursor-pointer rounded-[5px] font-light"
+                                                >
+                                                    {processing && (
+                                                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                                    )}
+                                                    Lưu lại
+                                                </Button>
+                                            </div>
+                                        </CustomCard>
+                                    </>
+                                )}
                             </Form>
                         </div>
                     </div>

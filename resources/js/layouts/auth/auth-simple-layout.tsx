@@ -15,36 +15,46 @@ export default function AuthSimpleLayout({
     description,
 }: PropsWithChildren<AuthLayoutProps>) {
     return (
-        <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 overflow-hidden bg-background p-6 md:p-10">
-            {/* Background decorative elements */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
-                <div className="absolute -top-[10%] -left-[10%] h-[40%] w-[40%] animate-pulse rounded-full bg-primary/10 blur-[120px]" />
-                <div className="absolute top-[20%] -right-[10%] h-[35%] w-[35%] animate-pulse rounded-full bg-chart-1/10 blur-[100px] [animation-delay:2s]" />
-                <div className="absolute -bottom-[10%] left-[20%] h-[30%] w-[30%] animate-pulse rounded-full bg-chart-2/10 blur-[80px] [animation-delay:4s]" />
+        <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 overflow-hidden bg-zinc-950 p-6 md:p-10">
+            {/* Fabulous Dynamic Background */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-10%] left-[-10%] h-[60%] w-[60%] animate-[spin_20s_linear_infinite] rounded-full bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] h-[60%] w-[60%] animate-[spin_15s_linear_infinite_reverse] rounded-full bg-gradient-to-tr from-cyan-500/20 via-blue-500/20 to-emerald-500/20 blur-[120px]" />
+                <div className="absolute top-1/2 left-1/2 h-[40%] w-[40%] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-primary/10 blur-[100px]" />
             </div>
 
-            <div className="relative z-10 w-full max-w-sm">
+            {/* Grain Texture Overlay */}
+            <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+
+            <div className="relative z-10 w-full max-w-md">
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">
                         <Link
                             href={home()}
-                            className="flex flex-col items-center gap-2 font-medium transition-transform hover:scale-105"
+                            className="group relative flex flex-col items-center gap-3 transition-all hover:scale-105"
                         >
-                            <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-                                <AppLogoIcon className="size-8 fill-current text-primary-foreground" />
+                            <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/10 p-0.5 shadow-2xl ring-1 ring-white/20 backdrop-blur-xl transition-all group-hover:ring-white/40">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 to-purple-500/40 opacity-0 transition-opacity group-hover:opacity-100" />
+                                <AppLogoIcon className="relative z-10 size-10 fill-white drop-shadow-sm" />
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>
 
-                        <div className="space-y-2 text-center">
-                            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                            <p className="text-center text-sm text-muted-foreground">
+                        <div className="space-y-1.5 text-center">
+                            <h1 className="text-3xl font-bold tracking-tight text-white">{title}</h1>
+                            <p className="text-balance text-sm font-medium text-zinc-400">
                                 {description}
                             </p>
                         </div>
                     </div>
-                    <div className="rounded-2xl border bg-card p-8 shadow-xl shadow-black/5 dark:shadow-none">
-                        {children}
+                    
+                    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 p-8 shadow-2xl backdrop-blur-2xl md:p-10">
+                        {/* Inner glow effect */}
+                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/[0.05] to-transparent" />
+                        
+                        <div className="relative z-10">
+                            {children}
+                        </div>
                     </div>
                 </div>
             </div>
