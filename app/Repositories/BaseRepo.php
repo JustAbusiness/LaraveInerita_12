@@ -9,6 +9,10 @@ class BaseRepo
     public function __construct($model)
     {
         $this->model = $model;
-    } 
+    }
 
+    public function getFillable():  array
+    {
+        return $this->model->getFillable();
+    }
 }
