@@ -19,6 +19,10 @@ class UserCatalogue extends Model
         'deleted_at'
      ];
 
+     protected $relationtable = [
+         'users'
+     ];
+
      public function creators(): BelongsTo
      {
         return $this->belongsTo(User::class, 'user_id', 'id');
@@ -28,5 +32,10 @@ class UserCatalogue extends Model
      {
         return $this->belongsToMany(User::class, 'user_catalogue_users');
      }
+
+     public function getRelationable() {
+        return $this->relationtable;
+     }
+
+
 }
- 

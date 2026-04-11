@@ -13,6 +13,11 @@ abstract class BaseService implements BaseServiceInteface
     protected $repository;
     protected $request;
     protected $modelData;
+    protected $model;
+    protected $result;
+    protected $withRelation;
+    protected $afterSave;
+
 
     public function __construct($repository)
     {
@@ -26,14 +31,17 @@ abstract class BaseService implements BaseServiceInteface
         $this->request = $request;
         return $this;
     }
-
     public function save(Request $request, ?int $id  = null) {
         try {
             return $this->beginTransaction()
             ->setRequest($request)
             ->prepareModelData()
-            ->beforeSave();
-
+            ->beforeSave()
+            ->saveModel($id)
+            ->withRelation()
+            ->afterSave()
+            ->commit()
+            ->getResult();
 
         } catch (\Throwable $th) {
              DB::rollBack();
@@ -41,5 +49,14 @@ abstract class BaseService implements BaseServiceInteface
         }
     }
 
+    private function saveModel(?int $id = null) : static {
+        $this->model = $id ?  $this->repository->update($this->modelData, $id) : $this->repository->create($this->modelData);
+        $this->result = $this->model;
+        return $this;
+    }
 
+    private function getResult() {
+        $this->result = $this->model;
+        return $this;
+    }
 }

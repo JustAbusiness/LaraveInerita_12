@@ -28,4 +28,21 @@ trait HasTransaction
         return $this;
     }
 
+    protected function afterSave(): static
+    {
+        return $this;
+    }
+
+    protected function withRelation(): static
+    {
+        $relationable = $this->repository->getRelationable() ?? [];
+        if (count($relationable)) {
+            foreach ($relationable as $relation) {
+                if ($this->request->has($relation)) {
+                    $this->model->{$relation}()->sync($this->request->{$relation})  ;
+                }
+            }
+        }
+        return $this;
+    }
 }
