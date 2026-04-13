@@ -12,18 +12,18 @@ class BaseController extends Controller
     protected $service;
     public function __construct(
         $service
-    )
-    {
+    ) {
         $this->service = $service;
     }
 
-    public function handleAction($request, $response, string $redirectRoute): RedirectResponse {
+    public function handleAction($request, $response, string $redirectRoute): RedirectResponse
+    {
         if ($response) {
-            if ($request->input(CommonEnum::SAVE_AND_REDIRECT) ) {
-                 return redirect()->intended(route($redirectRoute, absolute: false));
+            if ($request->input(CommonEnum::SAVE_AND_REDIRECT) && $request->input(CommonEnum::SAVE_AND_REDIRECT) === CommonEnum::REDIRECT) {
+                return to_route($redirectRoute);
             }
-            return redirect()->back(); 
-        }
+            return redirect()->back();
+        } 
         return redirect()->back()->with('error', Lang::get('message.save_failed'));
     }
 

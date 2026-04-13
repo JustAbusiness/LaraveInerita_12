@@ -5,14 +5,14 @@ import CustomNotice from '@/components/ui/custom-notice';
 import CustomPageHeading from '@/components/ui/customer-page-heading';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import user_catalogue from '@/routes/user_catalogue';
 import { type BreadcrumbItem, type PageConfig } from '@/types';
-import { Textarea } from '@/components/ui/textarea';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import * as z from 'zod';
+import { useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,22 +25,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const schema = z.object({
-    name: z.string().min(1, { message: 'Tên nhóm thành viên là bắt buộc' }),
-    canonical: z
-        .string()
-        .min(1, { message: 'Từ khoá nhóm thành viên là bắt buộc' }),
-    description: z.string().optional(),
-});
-
-export type TFormValues = z.infer<typeof schema>;
-
-const pageConfig: PageConfig<TFormValues> = {
-    schema: schema,
+const pageConfig: PageConfig = {
     heading: 'Quản lý nhóm thông viên',
 };
 
 export default function UserCatalogueSave() {
+    const buttonAction = useRef('');
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={pageConfig.heading} />
@@ -55,7 +46,19 @@ export default function UserCatalogueSave() {
                             <CustomNotice />
                         </div>
                         <div className="col-span-7">
-                            <Form action={user_catalogue.store()} method="post">
+                            <Form
+                                action={user_catalogue.store()}
+                                resetOnSuccess={[
+                                    'name',
+                                    'canonical',
+                                    'description',
+                                ]}
+                                transform={(data) => ({
+                                    ...data,
+                                    save_and_redirect: buttonAction.current,
+                                })}
+                                method="post"
+                            >
                                 {({ processing, errors }) => (
                                     <>
                                         <CustomCard
@@ -65,7 +68,10 @@ export default function UserCatalogueSave() {
                                         >
                                             <div className="mb-[20px] grid grid-cols-2 gap-4">
                                                 <div className="col-span-1">
-                                                    <Label htmlFor='name' className="mb-[10px]">
+                                                    <Label
+                                                        htmlFor="name"
+                                                        className="mb-[10px]"
+                                                    >
                                                         Tên nhóm thông viên
                                                     </Label>
                                                     <Input
@@ -80,11 +86,14 @@ export default function UserCatalogueSave() {
                                                     />
                                                     <InputError
                                                         message={errors.name}
-                                                        className='mt-[5px]'
-                                                    /> 
+                                                        className="mt-[5px]"
+                                                    />
                                                 </div>
                                                 <div className="col-span-1">
-                                                    <Label htmlFor='canonical' className="mb-[10px]">
+                                                    <Label
+                                                        htmlFor="canonical"
+                                                        className="mb-[10px]"
+                                                    >
                                                         Từ khoá
                                                     </Label>
                                                     <Input
@@ -98,37 +107,63 @@ export default function UserCatalogueSave() {
                                                         className="mt-1 block w-full"
                                                     />
                                                     <InputError
-                                                        message={errors.canonical}
-                                                        className='mt-[5px]'
+                                                        message={
+                                                            errors.canonical
+                                                        }
+                                                        className="mt-[5px]"
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <Label htmlFor='description' className="mb-[10px]">
+                                                <Label
+                                                    htmlFor="description"
+                                                    className="mb-[10px]"
+                                                >
                                                     Mô tả ngắn
                                                 </Label>
                                                 <Textarea
                                                     name="description"
-                                                    className='h-[168px]'
+                                                    className="h-[168px]"
                                                     autoFocus
                                                     tabIndex={1}
-                                                    autoComplete=''
-                                                    placeholder=''
+                                                    autoComplete=""
+                                                    placeholder=""
                                                 />
                                             </div>
 
                                             <div className="mt-[20px]">
-                                                <Button
-                                                    type="submit"
-                                                    tabIndex={4}
-                                                    disabled={processing}
-                                                    className="w-[150px] cursor-pointer rounded-[5px] font-light"
-                                                >
-                                                    {processing && (
-                                                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                                    )}
-                                                    Lưu lại
-                                                </Button>
+                                                <div className="flex space-x-2">
+                                                    <Button
+                                                        type="submit"
+                                                        tabIndex={4}
+                                                        disabled={processing}
+                                                        onClick={() => {
+                                                            buttonAction.current =
+                                                                '';
+                                                        }}
+                                                        className="w-[150px] cursor-pointer rounded-[5px] font-light"
+                                                    >
+                                                        {processing && (
+                                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                                        )}
+                                                        Lưu lại
+                                                    </Button> 
+                                                    <Button
+                                                        type="submit"
+                                                        tabIndex={4}
+                                                        disabled={processing}
+                                                        onClick={() => {
+                                                            buttonAction.current =
+                                                                'redirect';
+                                                        }}
+                                                        className="w-[150px] cursor-pointer rounded-[5px] bg-blue-500 font-light"
+                                                    >
+                                                        {processing && (
+                                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                                        )}
+                                                        Lưu lại và đóng
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </CustomCard>
                                     </>

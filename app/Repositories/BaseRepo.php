@@ -14,15 +14,18 @@ class BaseRepo
         $this->model = $model;
     }
 
-    public function getFillable():  array
+    public function getFillable(): array
     {
         return $this->model->getFillable();
     }
 
-    public function getRelationable():  array
+    public function getRelationable(): array
     {
-        return $this->model->getRelationable();
+        return method_exists($this->model, 'getRelationable') ? $this->model->getRelationable() : [];
     }
 
-    public function create(array $payload = []);
+    public function create(array $payload)
+    {
+        return $this->model->create($payload);
+    }
 }

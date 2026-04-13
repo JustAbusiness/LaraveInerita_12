@@ -38,12 +38,12 @@ class UserCatalogueController extends BaseController
     public function store(StoreRequest $request):  RedirectResponse
     {
         $response = $this->service->save($request);
-        return $this->handleAction($request, $response, redirectRoute: 'user_catalogue/index');
+        return $this->handleAction($request, $response , redirectRoute: 'user_catalogue.index');
     }
 
     public function update(UpdateRequest $request, $id): RedirectResponse
     {
         $response = $this->service->save( $request, $id);
-        return $this->handleAction($request, $response, redirectRoute: 'user_catalogue/index');
+        return $this->handleAction($request, $response, redirectRoute: 'user_catalogue.index');
     }
 }

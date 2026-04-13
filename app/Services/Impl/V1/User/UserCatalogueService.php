@@ -10,7 +10,7 @@ use App\Services\Interfaces\User\UserCatalogueServiceInterface;
 
 class UserCatalogueService extends BaseService implements UserCatalogueServiceInterface
 {
-     protected $repository;
+    protected $repository;
 
 
     public function __construct(UserCatalogueRepo $repository)
@@ -19,14 +19,14 @@ class UserCatalogueService extends BaseService implements UserCatalogueServiceIn
         parent::__construct($repository);
     }
 
-    protected function prepareModelData(): static {
-         $fillable = $this->repository->getFillable();
-         $this->modelData = $this->request->only($fillable);
-         $this->modelData['canonical'] = Str::slug($this->modelData['canonical']);
-         $this->modelData['user_id'] = Auth::id();
-         dd($this->modelData);
-         return $this;
-     }
+    protected function prepareModelData(): static
+    {
+        $fillable = $this->repository->getFillable();
+        $this->modelData = $this->request->only($fillable);
+        $this->modelData['canonical'] = Str::slug($this->modelData['canonical']);
+        $this->modelData['user_id'] = Auth::id();
+        return $this;
+    }
 
 }
 

@@ -49,7 +49,6 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-export interface PageConfig<TFormValues>  {
-    schema: z.ZodSchema<TFormValues>
+export interface PageConfig  {
     heading: string
 }
