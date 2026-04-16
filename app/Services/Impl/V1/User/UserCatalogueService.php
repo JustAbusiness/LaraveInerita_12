@@ -3,15 +3,15 @@
 namespace App\Services\Impl\V1\User;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use App\Services\Impl\V1\BaseService;
 use App\Repositories\User\UserCatalogueRepo;
-use Illuminate\Support\Facades\Auth;
 use App\Services\Interfaces\User\UserCatalogueServiceInterface;
 
 class UserCatalogueService extends BaseService implements UserCatalogueServiceInterface
 {
     protected $repository;
-
+    protected $with = ['creators'];
 
     public function __construct(UserCatalogueRepo $repository)
     {

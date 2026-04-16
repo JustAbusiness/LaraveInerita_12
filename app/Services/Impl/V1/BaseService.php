@@ -2,10 +2,10 @@
 
 namespace App\Services\Impl\V1;
 
-use App\Services\Interfaces\BaseServiceInteface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Traits\HasTransaction;
+use Illuminate\Support\Facades\DB;
+use App\Services\Interfaces\BaseServiceInteface;
 
 abstract class BaseService implements BaseServiceInteface
 {
@@ -17,46 +17,63 @@ abstract class BaseService implements BaseServiceInteface
     protected $result;
     protected $withRelation;
     protected $afterSave;
+    protected $with = [];
 
 
     public function __construct($repository)
     {
-         $this->repository = $repository;
+        $this->repository = $repository;
     }
 
     protected abstract function prepareModelData(): static;
 
-    public function setRequest($request): static
+    protected function setRequest($request): static
     {
         $this->request = $request;
         return $this;
     }
-    public function save(Request $request, ?int $id  = null) {
+    public function save(Request $request, ?int $id = null)
+    {
         try {
             return $this->beginTransaction()
-            ->setRequest($request)
-            ->prepareModelData()
-            ->beforeSave()
-            ->saveModel($id)
-            ->withRelation()
-            ->afterSave()
-            ->commit()
-            ->getResult();
+                ->setRequest($request)
+                ->prepareModelData()
+                ->beforeSave()
+                ->saveModel($id)
+                ->withRelation()
+                ->afterSave()
+                ->commit()
+                ->getResult();
 
         } catch (\Throwable $th) {
-             DB::rollBack();
+            DB::rollBack();
             return false;
         }
     }
 
-    private function saveModel(?int $id = null) : static {
-        $this->model = $id ?  $this->repository->update($this->modelData, $id) : $this->repository->create($this->modelData);
+    private function saveModel(?int $id = null): static
+    {
+        $this->model = $id ? $this->repository->update($id, $this->modelData) : $this->repository->create($this->modelData);
         $this->result = $this->model;
         return $this;
     }
 
-    private function getResult() {
+    private function getResult()
+    {
+        return $this->result;
+    }
+
+    public function findById(int $id)
+    {
+        $this->model = $this->repository->findById($id, $this->with);
         $this->result = $this->model;
-        return $this;
+        return $this->getResult();
+    }
+
+    public function paginate(Request $request)
+    {
+        $perPage = $request->input('per_page', 15);
+        $this->result = $this->repository->paginate(['*'], $this->with, $perPage);
+        return $this->getResult();
     }
 }

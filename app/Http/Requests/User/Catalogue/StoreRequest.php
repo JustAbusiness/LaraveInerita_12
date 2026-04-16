@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\User\Catalogue;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
 {
@@ -23,7 +24,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'name' => 'required|string|max:255', 
+             'name' => 'required|string|max:255',
              'canonical' => 'required|string|unique:user_catalogues',
              'description' => 'sometimes|string',
         ];
@@ -36,5 +37,12 @@ class StoreRequest extends FormRequest
             'canonical' => Lang::get('message.user_catalogue.canonical'),
             'description' => Lang::get('message.user_catalogue.description'),
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+         $this->merge([
+             'canonical' => Str::slug($this->input('canonical')),
+         ]);
     }
 }

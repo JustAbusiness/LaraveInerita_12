@@ -24,8 +24,27 @@ class BaseRepo
         return method_exists($this->model, 'getRelationable') ? $this->model->getRelationable() : [];
     }
 
-    public function create(array $payload)
+    public function create(array $payload = []): Model|null
     {
-        return $this->model->create($payload);
+        return $this->model->create($payload)->fresh();
+    }
+
+    public function update(int $id, array $payload = []): Model
+    {
+        $model = $this->findById($id);
+        $model->fill($payload);
+        $model->save();
+        return $model;
+    }
+
+    public function findById(int $id, array $with = [], array $columns = ['*']): Model
+    {
+        return $this->model->select($columns)->with($with)->findOrFail($id);
+    }
+
+    public function paginate(array $columns = ['*'], array $with = [], int $perPage = 15)
+    {
+        $query = $this->model->select($columns)->with($with);
+        return $query->paginate($perPage);
     }
 }

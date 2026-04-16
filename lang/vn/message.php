@@ -6,5 +6,7 @@ return [
         'canonical' => 'Từ khoá',
         'description' => 'Mô tả ngắn',
     ],
-    'save_failed' => 'Create user catalogue failed, please try again.Create user catalogue failed, please try again.'
+    'save_failed' => 'Cập nhật bản ghi không thành công. Hãy thử lại',
+    'save_success' => 'Cập nhật bản ghi thành công'
+
 ];

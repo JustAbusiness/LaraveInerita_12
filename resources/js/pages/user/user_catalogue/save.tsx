@@ -9,10 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import user_catalogue from '@/routes/user_catalogue';
-import { type BreadcrumbItem, type PageConfig } from '@/types';
+import { IDateTime, type BreadcrumbItem, type PageConfig } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,8 +29,28 @@ const pageConfig: PageConfig = {
     heading: 'Quản lý nhóm thông viên',
 };
 
-export default function UserCatalogueSave() {
+export interface UserCatalogue extends IDateTime {
+    id: number;
+    name: string;
+    canonical: string;
+    description: string;
+}
+
+interface UserCatalogueSaveProps {
+    data?: UserCatalogue;
+}
+
+export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
     const buttonAction = useRef('');
+    const isEdit = !!data;
+
+    useEffect(() => {
+        if (isEdit) {
+            buttonAction.current = 'update';
+        } else {
+            buttonAction.current = 'create';
+        }
+    }, [isEdit]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -47,7 +67,7 @@ export default function UserCatalogueSave() {
                         </div>
                         <div className="col-span-7">
                             <Form
-                                action={user_catalogue.store()}
+                                action = {isEdit ? user_catalogue.update(data?.id) : user_catalogue.store()}
                                 resetOnSuccess={[
                                     'name',
                                     'canonical',
@@ -55,6 +75,7 @@ export default function UserCatalogueSave() {
                                 ]}
                                 transform={(data) => ({
                                     ...data,
+                                    ...(isEdit ? { _method: 'put' }: {}),
                                     save_and_redirect: buttonAction.current,
                                 })}
                                 method="post"
@@ -82,6 +103,7 @@ export default function UserCatalogueSave() {
                                                         autoFocus
                                                         autoComplete="name"
                                                         placeholder=""
+                                                        defaultValue={data?.name }
                                                         className="mt-1 block w-full"
                                                     />
                                                     <InputError
@@ -104,6 +126,7 @@ export default function UserCatalogueSave() {
                                                         autoFocus
                                                         autoComplete=""
                                                         placeholder=""
+                                                        defaultValue={data?.canonical}
                                                         className="mt-1 block w-full"
                                                     />
                                                     <InputError
@@ -128,6 +151,7 @@ export default function UserCatalogueSave() {
                                                     tabIndex={1}
                                                     autoComplete=""
                                                     placeholder=""
+                                                    defaultValue={data?.description}
                                                 />
                                             </div>
 
@@ -147,7 +171,7 @@ export default function UserCatalogueSave() {
                                                             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                                                         )}
                                                         Lưu lại
-                                                    </Button> 
+                                                    </Button>
                                                     <Button
                                                         type="submit"
                                                         tabIndex={4}
