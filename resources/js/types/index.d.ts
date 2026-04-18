@@ -35,7 +35,13 @@ export interface SharedData {
     auth: Auth;
     sidebarOpen: boolean;
     [key: string]: unknown;
-}
+    flash?: {
+        success?: string;
+        error?: string;
+        info?: string;
+        warming?: string;
+    }
+} 
 
 export interface User extends IDateTime {
     id: number;

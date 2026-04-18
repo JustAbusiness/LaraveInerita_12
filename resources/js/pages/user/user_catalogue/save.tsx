@@ -12,7 +12,7 @@ import user_catalogue from '@/routes/user_catalogue';
 import { IDateTime, type BreadcrumbItem, type PageConfig } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -44,13 +44,6 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
     const buttonAction = useRef('');
     const isEdit = !!data;
 
-    useEffect(() => {
-        if (isEdit) {
-            buttonAction.current = 'update';
-        } else {
-            buttonAction.current = 'create';
-        }
-    }, [isEdit]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -67,7 +60,16 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
                         </div>
                         <div className="col-span-7">
                             <Form
-                                action = {isEdit ? user_catalogue.update(data?.id) : user_catalogue.store()}
+                                options={{
+                                    preserveScroll: true,
+                                    preserveState: false,
+                                }}
+                                key={`${data?.id}_${data?.updated_at}`}
+                                action={
+                                    isEdit
+                                        ? user_catalogue.update(data?.id)
+                                        : user_catalogue.store()
+                                }
                                 resetOnSuccess={[
                                     'name',
                                     'canonical',
@@ -75,7 +77,7 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
                                 ]}
                                 transform={(data) => ({
                                     ...data,
-                                    ...(isEdit ? { _method: 'put' }: {}),
+                                    ...(isEdit ? { _method: 'put' } : {}),
                                     save_and_redirect: buttonAction.current,
                                 })}
                                 method="post"
@@ -103,7 +105,9 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
                                                         autoFocus
                                                         autoComplete="name"
                                                         placeholder=""
-                                                        defaultValue={data?.name }
+                                                        defaultValue={
+                                                            data?.name
+                                                        }
                                                         className="mt-1 block w-full"
                                                     />
                                                     <InputError
@@ -126,7 +130,9 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
                                                         autoFocus
                                                         autoComplete=""
                                                         placeholder=""
-                                                        defaultValue={data?.canonical}
+                                                        defaultValue={
+                                                            data?.canonical
+                                                        }
                                                         className="mt-1 block w-full"
                                                     />
                                                     <InputError
@@ -151,7 +157,9 @@ export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
                                                     tabIndex={1}
                                                     autoComplete=""
                                                     placeholder=""
-                                                    defaultValue={data?.description}
+                                                    defaultValue={
+                                                        data?.description
+                                                    }
                                                 />
                                             </div>
 

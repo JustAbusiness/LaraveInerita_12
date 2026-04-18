@@ -22,8 +22,8 @@ class BaseController extends Controller
             if ($request->input(CommonEnum::SAVE_AND_REDIRECT) && $request->input(CommonEnum::SAVE_AND_REDIRECT) === CommonEnum::REDIRECT) {
                 return to_route($redirectRoute);
             }
- 
-            if (!empty($editRoute)) {
+
+             if (!empty($editRoute)) {
                 return to_route($editRoute, $response->id)->with('success', Lang::get('message.save_success'));
             }
             return redirect()->back();
