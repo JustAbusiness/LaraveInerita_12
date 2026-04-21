@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\V1\User;
 
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Controllers\Backend\BaseController;
 use App\Http\Resources\User\UserCatalogueResource;
@@ -21,8 +22,9 @@ class UserCatalogueController extends BaseController
         $this->service = $service;
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $response = $this->service->paginate($request);
         return Inertia::render('user/user_catalogue/index');
     }
 
@@ -44,7 +46,7 @@ class UserCatalogueController extends BaseController
     }
 
     public function update(UpdateRequest $request, $id): RedirectResponse
-    { 
+    {
         $response = $this->service->save($request, $id);
         return $this->handleAction($request, $response, redirectRoute: 'user_catalogue.index', editRoute: 'user_catalogue.edit');
     }

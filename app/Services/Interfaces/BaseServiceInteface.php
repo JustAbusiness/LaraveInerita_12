@@ -8,4 +8,5 @@ interface BaseServiceInteface
 {
     public function save(Request $request, ?int $id = null);
     public function findById(int $id);
+    public function paginate(Request $request); 
 }

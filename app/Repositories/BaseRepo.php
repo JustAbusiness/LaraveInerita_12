@@ -42,9 +42,14 @@ class BaseRepo
         return $this->model->select($columns)->with($with)->findOrFail($id);
     }
 
-    public function paginate(array $columns = ['*'], array $with = [], int $perPage = 15)
+    public function pagination(array $specs = [])
     {
-        $query = $this->model->select($columns)->with($with);
-        return $query->paginate($perPage);
+        $query = $this->model
+            ->with($specs['with'] ?? [])
+            ->simpleFilter($specs['filter']['simple'] ?? []);
+
+        return $specs['all'] 
+            ? $query->get() 
+            : $query->paginate($specs['perpage'] ?? 15);
     }
 }

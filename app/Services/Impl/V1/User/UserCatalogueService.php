@@ -11,7 +11,9 @@ use App\Services\Interfaces\User\UserCatalogueServiceInterface;
 class UserCatalogueService extends BaseService implements UserCatalogueServiceInterface
 {
     protected $repository;
-    protected $with = ['creators'];
+    protected $perpage;
+    protected $with = ['creators', 'users'];
+    protected $simpleFilter = ['id', 'publish']; 
 
     public function __construct(UserCatalogueRepo $repository)
     {

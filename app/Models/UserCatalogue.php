@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasQuery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserCatalogue extends Model
 {
-     use SoftDeletes;
+     use SoftDeletes, HasQuery;
 
      protected $fillable = [
         'name',
@@ -20,7 +21,8 @@ class UserCatalogue extends Model
      ];
 
      protected $relationtable = [
-         'users'
+         'users',
+         'creators'
      ];
 
      public function creators(): BelongsTo
@@ -30,7 +32,7 @@ class UserCatalogue extends Model
 
      public function users(): BelongsToMany
      {
-        return $this->belongsToMany(User::class, 'user_catalogue_users');
+        return $this->belongsToMany(User::class, 'user_catalogue_user');
      }
 
      public function getRelationable() {

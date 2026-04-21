@@ -3,13 +3,15 @@
 namespace App\Services\Impl\V1;
 
 use Illuminate\Http\Request;
+use App\Traits\HasSpecBuilder;
 use App\Traits\HasTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Services\Interfaces\BaseServiceInteface;
 
 abstract class BaseService implements BaseServiceInteface
 {
-    use HasTransaction;
+    use HasTransaction, HasSpecBuilder;
+
     protected $repository;
     protected $request;
     protected $modelData;
@@ -18,6 +20,8 @@ abstract class BaseService implements BaseServiceInteface
     protected $withRelation;
     protected $afterSave;
     protected $with = [];
+    protected $perpage = 20;
+    protected $simpleFilter = ['publish'];
 
 
     public function __construct($repository)
@@ -72,8 +76,10 @@ abstract class BaseService implements BaseServiceInteface
 
     public function paginate(Request $request)
     {
-        $perPage = $request->input('per_page', 15);
-        $this->result = $this->repository->paginate(['*'], $this->with, $perPage);
+        $this->setRequest($request);
+        $specification = $this->specifications();
+        $this->result = $this->repository->pagination($specification);
+        dd($this->result);
         return $this->getResult();
     }
 }
