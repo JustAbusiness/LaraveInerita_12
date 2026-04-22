@@ -46,10 +46,11 @@ class BaseRepo
     {
         $query = $this->model
             ->with($specs['with'] ?? [])
+            ->keyword($specs['filter']['keyword'] ?? [])
             ->simpleFilter($specs['filter']['simple'] ?? []);
 
-        return $specs['all'] 
-            ? $query->get() 
+        return $specs['all']
+            ? $query->get()
             : $query->paginate($specs['perpage'] ?? 15);
     }
 }

@@ -13,7 +13,8 @@ class UserCatalogueService extends BaseService implements UserCatalogueServiceIn
     protected $repository;
     protected $perpage;
     protected $with = ['creators', 'users'];
-    protected $simpleFilter = ['id', 'publish']; 
+    protected $simpleFilter = ['id', 'publish'];
+    protected $searchFields = ['name', 'canonical', 'description'];
 
     public function __construct(UserCatalogueRepo $repository)
     {

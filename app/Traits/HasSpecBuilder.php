@@ -11,7 +11,7 @@ trait HasSpecBuilder
             foreach ($filter as $key => $value) {
                 if ($this->request->has($value)) {
                     $condition[$value] = $this->request->input($value);
-                } 
+                }
             }
             return $condition;
         }
@@ -21,10 +21,15 @@ trait HasSpecBuilder
     {
         return [
             'all' => $this->request->input('type') === 'all',
-            'perpage' => $this->request->input('perpage') ?? $this->perpage ?? 15,
+            'perpage' => $this->request->input('perpage') ?? $this->perpage  ?? 15,
             'with' => $this->with ?? [],
             'filter' => [
                 'simple' => $this->build($this->simpleFilter),
+                'keyword' => [
+                    'q' => $this->request->input('keyword'),
+                    'fields' => $this->searchFields,
+                    'isMultiLanguage' => $this->isMultiLanguage ?? false,
+                ],
             ]
         ];
     }
