@@ -21,7 +21,7 @@ trait HasSpecBuilder
     {
         return [
             'all' => $this->request->input('type') === 'all',
-            'perpage' => $this->request->input('perpage') ?? $this->perpage  ?? 15,
+            'perpage' => $this->request->input('perpage') ?? $this->perpage ?? 15,
             'with' => $this->with ?? [],
             'filter' => [
                 'simple' => $this->build($this->simpleFilter),
@@ -30,6 +30,8 @@ trait HasSpecBuilder
                     'fields' => $this->searchFields,
                     'isMultiLanguage' => $this->isMultiLanguage ?? false,
                 ],
+                'complex' => $this->build($this->complexFilter),
+                'date' => $this->build($this->dateFilter),
             ]
         ];
     }
