@@ -41,7 +41,7 @@ export interface SharedData {
         info?: string;
         warming?: string;
     }
-} 
+}
 
 export interface User extends IDateTime {
     id: number;
@@ -59,5 +59,9 @@ export interface IDateTime {
 }
 
 export interface PageConfig  {
-    heading: string
+    module: string;
+    heading: string;
+    cardHeading?: string;
+    cardDescription?: string;
+
 }

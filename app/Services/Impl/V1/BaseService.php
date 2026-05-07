@@ -12,7 +12,7 @@ abstract class BaseService implements BaseServiceInteface
 {
     use HasTransaction, HasSpecBuilder;
 
-    protected $repository;
+    protected mixed $repository;
     protected $request;
     protected $modelData;
     protected $model;
@@ -25,8 +25,9 @@ abstract class BaseService implements BaseServiceInteface
     protected $complexFilter = ['id'];
     protected $searchFields = ['name'];
     protected $dateFilter = ['created_at', 'updated_at'];
+    protected $sort = ['id', 'desc'];
 
-    public function __construct($repository)
+    public function __construct(mixed $repository)
     {
         $this->repository = $repository;
     }
@@ -81,7 +82,6 @@ abstract class BaseService implements BaseServiceInteface
         $this->setRequest($request);
         $specification = $this->specifications();
         $this->result = $this->repository->pagination($specification);
-        dd($this->result);
         return $this->getResult();
     }
 }

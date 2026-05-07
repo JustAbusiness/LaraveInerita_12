@@ -22,6 +22,7 @@ trait HasSpecBuilder
         return [
             'all' => $this->request->input('type') === 'all',
             'perpage' => $this->request->input('perpage') ?? $this->perpage ?? 15,
+            'sort' => $this->request->input('sort') ? explode(',', $this->request->input('sort')) : [],
             'with' => $this->with ?? [],
             'filter' => [
                 'simple' => $this->build($this->simpleFilter),

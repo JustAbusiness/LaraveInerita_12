@@ -49,7 +49,8 @@ class BaseRepo
             ->keyword($specs['filter']['keyword'] ?? [])
             ->complexFilter($specs['filter']['complex'] ?? [])
             ->dateFilter($specs['filter']['date'] ?? [])
-            ->simpleFilter($specs['filter']['simple'] ?? []);
+            ->simpleFilter($specs['filter']['simple'] ?? [])
+            ->orderBy($specs['sort'][0], $specs['sort'][1]);
 
         return $specs['all']
             ? $query->get()
