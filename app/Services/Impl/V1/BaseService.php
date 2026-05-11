@@ -12,7 +12,7 @@ abstract class BaseService implements BaseServiceInteface
 {
     use HasTransaction, HasSpecBuilder;
 
-    protected mixed $repository;
+    protected $repository;
     protected $request;
     protected $modelData;
     protected $model;
@@ -83,5 +83,10 @@ abstract class BaseService implements BaseServiceInteface
         $specification = $this->specifications();
         $this->result = $this->repository->pagination($specification);
         return $this->getResult();
+    }
+
+    public function destroy(int $id)
+    {
+        return $this->repository->delete($id);
     }
 }

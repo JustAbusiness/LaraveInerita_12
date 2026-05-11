@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Enum\CommonEnum;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Lang;
 
 class BaseController extends Controller
@@ -16,19 +16,30 @@ class BaseController extends Controller
         $this->service = $service;
     }
 
-    public function handleAction($request, $response, string $redirectRoute, ?string $editRoute = ' '): RedirectResponse
+    public function handleAction($request, $response, string $redirectRoute = '', ?string $editRoute = ''): JsonResponse
     {
         if ($response) {
-            if ($request->input(CommonEnum::SAVE_AND_REDIRECT) && $request->input(CommonEnum::SAVE_AND_REDIRECT) === CommonEnum::REDIRECT) {
-                return to_route($redirectRoute);
-            }
-
-             if (!empty($editRoute)) {
-                return to_route($editRoute, $response->id)->with('success', Lang::get('message.save_success'));
-            }
-            return redirect()->back();
+            return $this->responseSuccess($response, Lang::get('message.save_success'));
         }
-        return redirect()->back()->with('error', Lang::get('message.save_failed'));
+        return $this->responseError(Lang::get('message.save_failed'));
+    }
+
+    protected function responseSuccess($data = [], string $message = 'Success', int $code = 200): JsonResponse
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => $message,
+            'data' => $data
+        ], $code);
+    }
+
+    protected function responseError(string $message = 'Error', int $code = 500, $errors = []): JsonResponse
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+            'errors' => $errors
+        ], $code);
     }
 
 }

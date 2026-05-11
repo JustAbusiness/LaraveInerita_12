@@ -63,8 +63,9 @@ trait HasQuery
                                 $query->where($field, '=', $value);
                                 break;
                             case 'between':
-                                [$min, $max] = explode(',', $value);
-                                if (isset($min) && isset($max) && $min < $max) {
+                                $parts = explode(',', $value);
+                                if (count($parts) === 2) {
+                                    [$min, $max] = $parts;
                                     $query->whereBetween($field, [$min, $max]);
                                 }
                                 break;

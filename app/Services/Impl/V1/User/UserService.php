@@ -2,7 +2,6 @@
 
 namespace App\Services\Impl\V1\User;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Impl\V1\BaseService;
 use App\Repositories\User\UserRepo;
@@ -13,7 +12,7 @@ class UserService extends BaseService implements UserServiceInterface
     protected $repository;
     protected $perpage;
     protected $with = ['creators'];
-    protected $searchFields = ['name', 'phone', 'description', 'email'];
+    protected $searchFields = ['name', 'phone', 'description', 'email']; 
 
     public function __construct(UserRepo $repository)
     {

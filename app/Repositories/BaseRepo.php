@@ -49,11 +49,14 @@ class BaseRepo
             ->keyword($specs['filter']['keyword'] ?? [])
             ->complexFilter($specs['filter']['complex'] ?? [])
             ->dateFilter($specs['filter']['date'] ?? [])
-            ->simpleFilter($specs['filter']['simple'] ?? [])
-            ->orderBy($specs['sort'][0], $specs['sort'][1]);
+            ->simpleFilter($specs['filter']['simple'] ?? []);
+        
+        $query->when(!empty($specs['sort']), function ($query) use ($specs) {
+            return $query->orderBy($specs['sort'][0], $specs['sort'][1] ?? 'asc');
+        });
 
         return $specs['all']
             ? $query->get()
-            : $query->paginate($specs['perpage'] ?? 15);
+            : $query->paginate($specs['perpage'] ?? 15)->withQueryString();
     }
 }
