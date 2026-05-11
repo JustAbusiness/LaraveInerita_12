@@ -33,6 +33,18 @@ trait HasTransaction
         return $this;
     }
 
+    protected function beforeDelete(int $id): static
+    { 
+        $this->findById($id);
+        $this->result = $this->model;
+        return $this; 
+    }
+
+    protected function afterDelete(): static
+    {
+        return $this;
+    }
+
     protected function withRelation(): static
     {
         $relationable = $this->repository->getRelationable() ?? [];

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Backend\V1\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Backend\BaseController;
-use App\Http\Resources\User\UserCatalogueResource;
 use App\Http\Requests\User\Catalogue\StoreRequest;
 use App\Http\Requests\User\Catalogue\UpdateRequest;
 use App\Services\Interfaces\User\UserCatalogueServiceInterface as UserCatalogueService;
@@ -28,7 +27,7 @@ class UserCatalogueController extends BaseController
 
     public function show(int $id): JsonResponse
     {
-        $data = new UserCatalogueResource($this->service->findById($id));
+        $data = $this->service->show($id);
         return $this->responseSuccess($data);
     }
 

@@ -5,7 +5,6 @@ namespace App\Services\Impl\V1;
 use Illuminate\Http\Request;
 use App\Traits\HasSpecBuilder;
 use App\Traits\HasTransaction;
-use Illuminate\Support\Facades\DB;
 use App\Services\Interfaces\BaseServiceInteface;
 
 abstract class BaseService implements BaseServiceInteface
@@ -53,7 +52,7 @@ abstract class BaseService implements BaseServiceInteface
                 ->getResult();
 
         } catch (\Throwable $th) {
-            DB::rollBack();
+            $this->rollback();
             return false;
         }
     }
@@ -73,6 +72,11 @@ abstract class BaseService implements BaseServiceInteface
     public function findById(int $id)
     {
         $this->model = $this->repository->findById($id, $this->with);
+    }
+
+    public function show(int $id)
+    {
+        $this->findById($id);
         $this->result = $this->model;
         return $this->getResult();
     }
@@ -87,6 +91,23 @@ abstract class BaseService implements BaseServiceInteface
 
     public function destroy(int $id)
     {
-        return $this->repository->delete($id);
+        try {
+            return $this->beginTransaction()
+                ->beforeDelete($id)
+                ->deleteModel()
+                ->afterDelete()
+                ->commit()
+                ->getResult();
+
+        } catch (\Throwable $th) {
+            $this->rollBack();
+            return false;
+        }
+    }
+
+    public function deleteModel(): static
+    {
+        $this->result = $this->model->delete();
+        return $this;
     }
 }
