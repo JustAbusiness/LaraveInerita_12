@@ -27,6 +27,7 @@ class StoreRequest extends FormRequest
              'name' => 'required|string|max:255',
              'canonical' => 'required|string|unique:user_catalogues',
              'description' => 'sometimes|string',
+             'publish' => 'sometimes|in:1,2',
         ];
     }
 

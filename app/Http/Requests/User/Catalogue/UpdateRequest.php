@@ -23,14 +23,18 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $method = $this->getMethod();
+        $sometimes = $method === "PATCH" ? "sometimes" : "";
+
         return [
-            'name' => 'required|string|max:255',
+            'name' => [$sometimes, 'required', 'string', 'max:255'],
             'canonical' => [
-                'required',
+                $sometimes,
                 'string',
                 Rule::unique('user_catalogues')->ignore($this->route('user_catalogue')),
-            ],
+            ], 
             'description' => 'sometimes|string',
+            'publish' => 'sometimes|in:1,2'
         ];
     }
 

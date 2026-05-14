@@ -26,7 +26,11 @@ class UserCatalogueService extends BaseService implements UserCatalogueServiceIn
     {
         $fillable = $this->repository->getFillable();
         $this->modelData = $this->request->only($fillable);
-        $this->modelData['canonical'] = Str::slug($this->modelData['canonical']);
+        
+        if (isset($this->modelData['canonical'])) {
+            $this->modelData['canonical'] = Str::slug($this->modelData['canonical']);
+        } 
+        
         $this->modelData['user_id'] = Auth::id();
         return $this;
     }

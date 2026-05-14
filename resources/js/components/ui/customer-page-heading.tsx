@@ -8,12 +8,18 @@ interface CustomPageHeadingProps {
 
 const CustomPageHeading = ({ heading, breadcrumbs}: CustomPageHeadingProps) => {
     return (
-        <div className="border-b border-[#e7eaec] page-heading px-[20px] py-[20px] bg-white">
-            <h2 className="text-[24px] uppercase font-normal mb-[5px] ">{heading}</h2> 
-            <ol className="custom-breadcrumb flex flex-1">
-                {breadcrumbs.map(item =>
-                    <li key={item.title}>
-                        <Link href={item.href}>{item.title}</Link >
+        <div className="border-b border-zinc-200 page-heading px-6 py-6 bg-white shadow-sm">
+            {heading && <h2 className="text-[20px] uppercase font-bold mb-2 text-zinc-900 tracking-tight">{heading}</h2>}
+            <ol className="custom-breadcrumb flex items-center gap-2 text-sm text-zinc-500">
+                {breadcrumbs.map((item, index) =>
+                    <li key={item.title} className="flex items-center gap-2">
+                        {index > 0 && <span className="text-zinc-300">/</span>}
+                        <Link 
+                            href={item.href} 
+                            className={`hover:text-indigo-600 transition-colors ${index === breadcrumbs.length - 1 ? 'font-medium text-zinc-900' : ''}`}
+                        >
+                            {item.title}
+                        </Link >
                     </li>
                 )}
             </ol>

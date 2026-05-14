@@ -17,6 +17,7 @@ interface CustomCardProps {
     isShowFooter?: boolean;
     children?: React.ReactNode;
     footerChildren?: React.ReactNode;
+    className?: string;
 }
 const CustomCard = ({
     loading,
@@ -27,13 +28,14 @@ const CustomCard = ({
     isShowFooter,
     children,
     footerChildren,
+    className,
 }: CustomCardProps) => {
     return (
-        <Card className="relative overflow-hidden rounded-[5px] pt-[20px]">
+        <Card className={`relative overflow-hidden rounded-[5px] pt-[20px] ${className}`}>
             {isShowHeader && (
-                <CardHeader className="border- b">
-                    <CardTitle className='uppercase '>{title}</CardTitle>
-                    <CardDescription className='pb-[20px]'>{description}</CardDescription>
+                <CardHeader className="border-b border-zinc-100 mb-6">
+                    <CardTitle className="uppercase text-zinc-900 font-bold tracking-tight">{title}</CardTitle>
+                    <CardDescription className="text-zinc-500 font-medium">{description}</CardDescription>
                 </CardHeader>
             )}
             <CardContent className={`${height ?? 'h-[48]'}`}>

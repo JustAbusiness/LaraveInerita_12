@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import { dashboard } from '@/routes';
-import user_catalogue from '@/routes/user_catalogue';
-import { IDateTime, type BreadcrumbItem, type PageConfig } from '@/types';
-import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { useRef } from 'react';
+import { IDateTime, type BreadcrumbItem } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { Loader2, LoaderCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,13 +22,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Quản lý nhóm thành viên',
-        href: '/',
+        href: '/user_catalogue',
     },
 ];
-
-const pageConfig: PageConfig = {
-    heading: 'Quản lý nhóm thông viên',
-};
 
 export interface UserCatalogue extends IDateTime {
     id: number;
@@ -37,170 +34,231 @@ export interface UserCatalogue extends IDateTime {
 }
 
 interface UserCatalogueSaveProps {
-    data?: UserCatalogue;
+    id?: string;
 }
 
-export default function UserCatalogueSave({ data }: UserCatalogueSaveProps) {
-    const buttonAction = useRef('');
-    const isEdit = !!data;
+export default function UserCatalogueSave({ id }: UserCatalogueSaveProps) {
+    const isEdit = !!id;
+    const [loading, setLoading] = useState(isEdit);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [formData, setFormData] = useState({
+        name: '',
+        canonical: '',
+        description: '',
+    });
 
+    useEffect(() => {
+        if (isEdit) {
+            const fetchData = async () => {
+                try {
+                    const response = await api.get(`/user_catalogue/${id}`);
+                    if (response.data.status === 'success') {
+                        const { name, canonical, description } =
+                            response.data.data;
+                        setFormData({ name, canonical, description });
+                    }
+                } catch (error) {
+                    toast.error('Không thể tải thông tin bản ghi');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [id, isEdit]);
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        if (errors[name]) {
+            setErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent, redirectAfter = false) => {
+        e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+
+        try {
+            const response = isEdit
+                ? await api.put(`/user_catalogue/${id}`, formData)
+                : await api.post('/user_catalogue', formData);
+
+            if (response.data.status === 'success') {
+                toast.success(
+                    isEdit ? 'Cập nhật thành công' : 'Thêm mới thành công',
+                );
+                if (redirectAfter) {
+                    router.visit('/user_catalogue');
+                } else if (!isEdit) {
+                    setFormData({ name: '', canonical: '', description: '' });
+                }
+            }
+        } catch (error: any) {
+            if (error.response?.status === 422) {
+                const validationErrors = error.response.data.errors;
+                const formattedErrors: Record<string, string> = {};
+                Object.keys(validationErrors).forEach((key) => {
+                    formattedErrors[key] = validationErrors[key][0];
+                });
+                setErrors(formattedErrors);
+            } else {
+                toast.error('Đã có lỗi xảy ra');
+            }
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <div className="flex h-full items-center justify-center p-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </AppLayout>
+        );
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={pageConfig.heading} />
-            <div className="rounded-x l page-wrapper flex h-full flex-1 flex-col gap-4 overflow-x-auto">
+            <Head
+                title={
+                    isEdit
+                        ? `Sửa: ${formData.name}`
+                        : 'Thêm mới nhóm thành viên'
+                }
+            />
+            <div className="page-wrapper flex h-full flex-1 flex-col gap-4 overflow-x-auto bg-zinc-50/50">
                 <CustomPageHeading
-                    heading={pageConfig.heading}
+                    heading={
+                        isEdit
+                            ? 'Cập nhật nhóm thành viên'
+                            : 'Thêm mới nhóm thành viên'
+                    }
                     breadcrumbs={breadcrumbs}
                 />
-                <div className="page-container">
-                    <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-5">
+                <div className="page-container px-6 pb-10">
+                    <div className="grid grid-cols-12 gap-6">
+                        <div className="col-span-12 lg:col-span-4">
                             <CustomNotice />
                         </div>
-                        <div className="col-span-7">
-                            <Form
-                                options={{
-                                    preserveScroll: true,
-                                    preserveState: false,
-                                }}
-                                key={`${data?.id}_${data?.updated_at}`}
-                                action={
-                                    isEdit
-                                        ? user_catalogue.update(data?.id)
-                                        : user_catalogue.store()
-                                }
-                                resetOnSuccess={[
-                                    'name',
-                                    'canonical',
-                                    'description',
-                                ]}
-                                transform={(data) => ({
-                                    ...data,
-                                    ...(isEdit ? { _method: 'put' } : {}),
-                                    save_and_redirect: buttonAction.current,
-                                })}
-                                method="post"
-                            >
-                                {({ processing, errors }) => (
-                                    <>
-                                        <CustomCard
-                                            isShowHeader={true}
-                                            title="Thông tin chung"
-                                            description="Nhập đầy đủ các thông tin dưới đây"
+                        <div className="col-span-12 lg:col-span-8">
+                            <form onSubmit={(e) => handleSubmit(e, false)}>
+                                <CustomCard
+                                    isShowHeader={true}
+                                    title="Thông tin chung"
+                                    description="Nhập đầy đủ các thông tin dưới đây để quản lý nhóm thành viên"
+                                    className="border-zinc-200 bg-white shadow-sm"
+                                >
+                                    <div className="mb-[24px] grid grid-cols-2 gap-6">
+                                        <div className="col-span-1">
+                                            <Label
+                                                htmlFor="name"
+                                                className="mb-[10px] text-[13px] font-semibold text-zinc-700"
+                                            >
+                                                Tên nhóm thành viên{' '}
+                                                <span className="text-rose-500">
+                                                    *
+                                                </span>
+                                            </Label>
+                                            <Input
+                                                id="name"
+                                                type="text"
+                                                name="name"
+                                                autoFocus
+                                                autoComplete="name"
+                                                value={formData.name}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full rounded-[5px] border-zinc-200 text-black focus:border-indigo-500 focus:ring-indigo-500"
+                                                placeholder="Nhập tên nhóm..."
+                                            />
+                                            <InputError
+                                                message={errors.name}
+                                                className="mt-[5px]"
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Label
+                                                htmlFor="canonical"
+                                                className="mb-[10px] text-[13px] font-semibold text-zinc-700"
+                                            >
+                                                Từ khoá{' '}
+                                                <span className="text-rose-500">
+                                                    *
+                                                </span>
+                                            </Label>
+                                            <Input
+                                                id="canonical"
+                                                type="text"
+                                                name="canonical"
+                                                value={formData.canonical}
+                                                onChange={handleChange}
+                                                className="mt-1 text-black block w-full rounded-[5px] border-zinc-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                                placeholder="Nhập từ khoá (ví dụ: admin)..."
+                                            />
+                                            <InputError
+                                                message={errors.canonical}
+                                                className="mt-[5px]"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mb-[24px]">
+                                        <Label
+                                            htmlFor="description"
+                                            className="mb-[10px] text-[13px] font-semibold text-zinc-700"
                                         >
-                                            <div className="mb-[20px] grid grid-cols-2 gap-4">
-                                                <div className="col-span-1">
-                                                    <Label
-                                                        htmlFor="name"
-                                                        className="mb-[10px]"
-                                                    >
-                                                        Tên nhóm thông viên
-                                                    </Label>
-                                                    <Input
-                                                        id="name"
-                                                        type="text"
-                                                        tabIndex={1}
-                                                        name="name"
-                                                        autoFocus
-                                                        autoComplete="name"
-                                                        placeholder=""
-                                                        defaultValue={
-                                                            data?.name
-                                                        }
-                                                        className="mt-1 block w-full"
-                                                    />
-                                                    <InputError
-                                                        message={errors.name}
-                                                        className="mt-[5px]"
-                                                    />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <Label
-                                                        htmlFor="canonical"
-                                                        className="mb-[10px]"
-                                                    >
-                                                        Từ khoá
-                                                    </Label>
-                                                    <Input
-                                                        id="canonical"
-                                                        type="text"
-                                                        tabIndex={1}
-                                                        name="canonical"
-                                                        autoFocus
-                                                        autoComplete=""
-                                                        placeholder=""
-                                                        defaultValue={
-                                                            data?.canonical
-                                                        }
-                                                        className="mt-1 block w-full"
-                                                    />
-                                                    <InputError
-                                                        message={
-                                                            errors.canonical
-                                                        }
-                                                        className="mt-[5px]"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <Label
-                                                    htmlFor="description"
-                                                    className="mb-[10px]"
-                                                >
-                                                    Mô tả ngắn
-                                                </Label>
-                                                <Textarea
-                                                    name="description"
-                                                    className="h-[168px]"
-                                                    autoFocus
-                                                    tabIndex={1}
-                                                    autoComplete=""
-                                                    placeholder=""
-                                                    defaultValue={
-                                                        data?.description
-                                                    }
-                                                />
-                                            </div>
+                                            Mô tả chi tiết
+                                        </Label>
+                                        <Textarea
+                                            id="description"
+                                            name="description"
+                                            className="min-h-[120px] rounded-[5px] border-zinc-200 text-black focus:border-indigo-500 focus:ring-indigo-500"
+                                            value={formData.description}
+                                            onChange={handleChange}
+                                            placeholder="Nhập mô tả cho nhóm này..."
+                                        />
+                                        <InputError
+                                            message={errors.description}
+                                            className="mt-[5px]"
+                                        />
+                                    </div>
 
-                                            <div className="mt-[20px]">
-                                                <div className="flex space-x-2">
-                                                    <Button
-                                                        type="submit"
-                                                        tabIndex={4}
-                                                        disabled={processing}
-                                                        onClick={() => {
-                                                            buttonAction.current =
-                                                                '';
-                                                        }}
-                                                        className="w-[150px] cursor-pointer rounded-[5px] font-light"
-                                                    >
-                                                        {processing && (
-                                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                                        )}
-                                                        Lưu lại
-                                                    </Button>
-                                                    <Button
-                                                        type="submit"
-                                                        tabIndex={4}
-                                                        disabled={processing}
-                                                        onClick={() => {
-                                                            buttonAction.current =
-                                                                'redirect';
-                                                        }}
-                                                        className="w-[150px] cursor-pointer rounded-[5px] bg-blue-500 font-light"
-                                                    >
-                                                        {processing && (
-                                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                                        )}
-                                                        Lưu lại và đóng
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </CustomCard>
-                                    </>
-                                )}
-                            </Form>
+                                    <div className="flex justify-end space-x-3 border-t border-zinc-100 pt-4">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="h-10 min-w-[120px] cursor-pointer rounded-[5px] bg-zinc-900 font-medium text-white transition-all hover:bg-zinc-800"
+                                        >
+                                            {processing && !loading && (
+                                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                            )}
+                                            Lưu lại
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            onClick={(e) =>
+                                                handleSubmit(e, true)
+                                            }
+                                            disabled={processing}
+                                            className="h-10 min-w-[160px] cursor-pointer rounded-[5px] bg-indigo-600 font-medium text-white transition-all hover:bg-indigo-700"
+                                        >
+                                            {processing && (
+                                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                            )}
+                                            Lưu lại và đóng
+                                        </Button>
+                                    </div>
+                                </CustomCard>
+                            </form>
                         </div>
                     </div>
                 </div>

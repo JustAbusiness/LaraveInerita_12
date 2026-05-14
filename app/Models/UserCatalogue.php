@@ -17,6 +17,7 @@ class UserCatalogue extends Model
       'canonical',
       'description',
       'user_id',
+      'publish',
       'deleted_at'
    ];
 
@@ -26,6 +27,7 @@ class UserCatalogue extends Model
    ];
 
    protected $casts = [
+      'publish' => 'integer',
       'created_at' => 'datetime:Y-m-d H:i',
       'updated_at' => 'datetime:Y-m-d H:i',
    ];

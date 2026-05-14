@@ -5,7 +5,10 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type PageConfig } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,31 +29,176 @@ const pageHeading: PageConfig = {
         'Quản lý thông tin danh sách nhóm thông viên, sử dụng các chức năng để lọc dữ liệu',
 };
 
+interface UserCatalogue {
+    id: number;
+    name: string;
+    canonical: string;
+    description: string;
+    publish: number;
+    created_at: string;
+}
+
 export default function Dashboard() {
+    const [catalogues, setCatalogues] = useState<UserCatalogue[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchCatalogues = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/user_catalogue');
+            if (response.data.status === 'success') {
+                // Assuming paginated response: data.data.data
+                setCatalogues(response.data.data.data || []);
+            }
+        } catch (error) {
+            toast.error('Không thể tải dữ liệu');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Bạn có chắc chắn muốn xoá bản ghi này?')) return;
+
+        try {
+            const response = await api.delete(`/user_catalogue/${id}`);
+            if (response.data.status === 'success') {
+                toast.success('Xoá bản ghi thành công');
+                fetchCatalogues();
+            }
+        } catch (error) {
+            toast.error('Xoá bản ghi thất bại');
+        }
+    };
+
+    const handleStatusChange = async (id: number, currentStatus: any) => {
+        const normalizedStatus = Number(currentStatus);
+        const newStatus = normalizedStatus === 1 ? 2 : 1;
+        try {
+            const response = await api.patch(`/user_catalogue/${id}`, {
+                publish: newStatus,
+            });
+            if (response.data.status === 'success') {
+                toast.success('Cập nhật trạng thái thành công');
+                // Optimistic update
+                setCatalogues(prev => prev.map(item => item.id === id ? { ...item, publish: newStatus } : item));
+            }
+        } catch (error) {
+            toast.error('Cập nhật trạng thái thất bại');
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCatalogues();
+    }, []);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Quản lý nhóm thành viên" />
-            <div className="page-wrapper flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl">
+            <div className="page-wrapper flex h-full flex-1 flex-col gap-4 overflow-x-auto bg-zinc-50/50">
                 <CustomPageHeading heading="" breadcrumbs={breadcrumbs} />
 
-                <div className="page-container">
+                <div className="page-container px-6 pb-10">
                     <CustomCard
                         isShowHeader={true}
-                        isShowFooter={true}
+                        isShowFooter={false}
                         title={pageHeading.cardHeading}
                         description={pageHeading.cardDescription}
+                        className="bg-white border-zinc-200 shadow-sm"
                     >
-                        <div className="mb-[10px] flex items-center justify-between">
-                            <div className=""> Lọc dữ liệu </div>
+                        <div className="mb-[20px] flex items-center justify-between">
+                            <div className="text-sm font-medium text-zinc-500"> 
+                                {loading ? 'Đang tải...' : `Tổng số: ${catalogues.length} bản ghi`}
+                            </div>
                             <Link
-                                href={`${pageHeading.module}/create`}
+                                href={`/${pageHeading.module}/create`}
                                 className="ml-[10px]"
                             >
-                                <Button className="cursor-pointer rounded-[5px] bg-[#ed5565] shadow hover:bg-[#ed5565]/80">
-                                    <PlusCircle />
+                                <Button className="cursor-pointer rounded-[5px] bg-[#ed5565] text-white shadow-sm hover:bg-[#ed5565]/90 border-none px-4">
+                                    <PlusCircle className="mr-2 h-4 w-4" />
                                     Thêm bản ghi mới
                                 </Button>
                             </Link>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+                            <table className="w-full text-sm">
+                                <thead className="bg-zinc-50/80">
+                                    <tr className="border-b border-zinc-200">
+                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">ID</th>
+                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Tên nhóm</th>
+                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Từ khoá</th>
+                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Mô tả</th>
+                                        <th className="h-12 px-4 text-center align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Tình trạng</th>
+                                        <th className="h-12 px-4 text-right align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan={6} className="p-20 text-center bg-white">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+                                                    <span className="text-zinc-400 text-sm">Đang tải dữ liệu...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : catalogues.length > 0 ? (
+                                        catalogues.map((item) => (
+                                            <tr key={item.id} className="border-b border-zinc-100 transition-colors hover:bg-zinc-50/50 bg-white">
+                                                <td className="p-4 align-middle font-medium text-zinc-900">{item.id}</td>
+                                                <td className="p-4 align-middle text-zinc-700 font-medium">{item.name}</td>
+                                                <td className="p-4 align-middle">
+                                                    <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-xs font-medium text-zinc-600 shadow-sm">
+                                                        {item.canonical}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 align-middle max-w-[200px] truncate text-zinc-500">{item.description}</td>
+                                                <td className="p-4 align-middle text-center">
+                                                    <button
+                                                        onClick={() => handleStatusChange(item.id, item.publish)}
+                                                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${
+                                                            Number(item.publish) === 1 ? 'bg-indigo-600' : 'bg-zinc-200'
+                                                        }`}
+                                                    >
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                                Number(item.publish) === 1 ? 'translate-x-5' : 'translate-x-0'
+                                                            }`}
+                                                        />
+                                                    </button>
+                                                </td>
+                                                <td className="p-4 align-middle text-right">
+                                                    <div className="flex justify-end gap-1">
+                                                        <Link href={`/${pageHeading.module}/${item.id}/edit`}>
+                                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-colors">
+                                                                <Pencil className="h-4.5 w-4.5" />
+                                                            </Button>
+                                                        </Link>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-9 w-9 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-full transition-colors"
+                                                            onClick={() => handleDelete(item.id)}
+                                                        >
+                                                            <Trash2 className="h-4.5 w-4.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={6} className="p-20 text-center text-zinc-400 bg-white italic">
+                                                Không có dữ liệu trong danh sách
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </CustomCard>
                 </div>
@@ -58,3 +206,4 @@ export default function Dashboard() {
         </AppLayout>
     );
 }
+
