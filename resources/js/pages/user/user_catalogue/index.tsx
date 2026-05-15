@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import CustomCard from '@/components/ui/custom-card';
 import CustomPageHeading from '@/components/ui/customer-page-heading';
 import AppLayout from '@/layouts/app-layout';
@@ -41,6 +42,7 @@ interface UserCatalogue {
 export default function Dashboard() {
     const [catalogues, setCatalogues] = useState<UserCatalogue[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
     const fetchCatalogues = async () => {
         try {
@@ -90,6 +92,20 @@ export default function Dashboard() {
         }
     };
 
+    const toggleSelectAll = () => {
+        if (selectedIds.length === catalogues.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(catalogues.map(item => item.id));
+        }
+    };
+
+    const toggleSelect = (id: number) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
     useEffect(() => {
         fetchCatalogues();
     }, []);
@@ -112,21 +128,33 @@ export default function Dashboard() {
                             <div className="text-sm font-medium text-zinc-500"> 
                                 {loading ? 'Đang tải...' : `Tổng số: ${catalogues.length} bản ghi`}
                             </div>
-                            <Link
-                                href={`/${pageHeading.module}/create`}
-                                className="ml-[10px]"
-                            >
-                                <Button className="cursor-pointer rounded-[5px] bg-[#ed5565] text-white shadow-sm hover:bg-[#ed5565]/90 border-none px-4">
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Thêm bản ghi mới
-                                </Button>
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                {selectedIds.length > 0 && (
+                                    <Button variant="outline" size="sm" className="h-9 rounded-[5px] text-rose-600 border-rose-200 hover:bg-rose-50">
+                                        Xoá {selectedIds.length} mục đã chọn
+                                    </Button>
+                                )}
+                                <Link
+                                    href={`/${pageHeading.module}/create`}
+                                >
+                                    <Button className="cursor-pointer rounded-[5px] bg-[#ed5565] text-white shadow-sm hover:bg-[#ed5565]/90 border-none px-4">
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Thêm bản ghi mới
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
 
                         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
                             <table className="w-full text-sm">
                                 <thead className="bg-zinc-50/80">
                                     <tr className="border-b border-zinc-200">
+                                        <th className="h-12 px-4 text-center align-middle">
+                                            <Checkbox 
+                                                checked={catalogues.length > 0 && selectedIds.length === catalogues.length}
+                                                onCheckedChange={toggleSelectAll}
+                                            />
+                                        </th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">ID</th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Tên nhóm</th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Từ khoá</th>
@@ -138,7 +166,7 @@ export default function Dashboard() {
                                 <tbody>
                                     {loading ? (
                                         <tr>
-                                            <td colSpan={6} className="p-20 text-center bg-white">
+                                            <td colSpan={7} className="p-20 text-center bg-white">
                                                 <div className="flex flex-col items-center gap-2">
                                                     <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
                                                     <span className="text-zinc-400 text-sm">Đang tải dữ liệu...</span>
@@ -148,6 +176,12 @@ export default function Dashboard() {
                                     ) : catalogues.length > 0 ? (
                                         catalogues.map((item) => (
                                             <tr key={item.id} className="border-b border-zinc-100 transition-colors hover:bg-zinc-50/50 bg-white">
+                                                <td className="p-4 text-center align-middle">
+                                                    <Checkbox 
+                                                        checked={selectedIds.includes(item.id)}
+                                                        onCheckedChange={() => toggleSelect(item.id)}
+                                                    />
+                                                </td>
                                                 <td className="p-4 align-middle font-medium text-zinc-900">{item.id}</td>
                                                 <td className="p-4 align-middle text-zinc-700 font-medium">{item.name}</td>
                                                 <td className="p-4 align-middle">
@@ -192,7 +226,7 @@ export default function Dashboard() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="p-20 text-center text-zinc-400 bg-white italic">
+                                            <td colSpan={7} className="p-20 text-center text-zinc-400 bg-white italic">
                                                 Không có dữ liệu trong danh sách
                                             </td>
                                         </tr>
