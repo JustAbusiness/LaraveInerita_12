@@ -7,10 +7,11 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Backend\BaseController;
 use App\Http\Requests\User\Catalogue\StoreRequest;
 use App\Http\Requests\User\Catalogue\UpdateRequest;
+use App\Http\Requests\User\UserCatalogue\BulkDestroyRequest;
 use App\Services\Interfaces\User\UserCatalogueServiceInterface as UserCatalogueService;
 
 class UserCatalogueController extends BaseController
-{
+{ 
     protected $service;
 
     public function __construct(
@@ -43,9 +44,15 @@ class UserCatalogueController extends BaseController
         return $this->handleAction($request, $response);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(int $id): JsonResponse 
     {
         $response = $this->service->destroy($id);
         return $this->handleAction(request(), $response);
     }
+
+    public function bulkDestroy(BulkDestroyRequest $request)
+    { 
+        $response = $this->service->bulkDestroy($request);
+        return $this->handleAction($request, $response);
+    } 
 }

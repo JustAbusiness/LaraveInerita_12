@@ -110,4 +110,25 @@ abstract class BaseService implements BaseServiceInteface
         $this->result = $this->model->delete();
         return $this;
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        try {
+            return $this->beginTransaction()
+                ->setRequest($request)
+                ->bulkDestroyModel()
+                ->afterBulkDestroy()
+                ->commit()
+                ->getResult();
+        } catch (\Throwable $th) {
+            $this->rollback();
+            return false;
+        }
+    }
+
+    public function bulkDestroyModel()
+    {
+        $this->result = $this->repository->bulkDestroy($this->request->input('ids', []));
+        return $this;
+    }
 }

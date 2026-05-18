@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/index';
 import { IDateTime, type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Loader2, LoaderCircle } from 'lucide-react';

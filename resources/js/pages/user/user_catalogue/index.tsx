@@ -3,7 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import CustomCard from '@/components/ui/custom-card';
 import CustomPageHeading from '@/components/ui/customer-page-heading';
 import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/index';
 import { type BreadcrumbItem, type PageConfig } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { PlusCircle, Pencil, Trash2, Loader2 } from 'lucide-react';
@@ -106,6 +106,24 @@ export default function Dashboard() {
         );
     };
 
+    const handleBulkDelete = async () => {
+        if (!confirm(`Bạn có chắc chắn muốn xoá ${selectedIds.length} bản ghi đã chọn?`)) return;
+
+        try {
+            const response = await api.post(`/user_catalogue/bulk-destroy`, {
+                ids: selectedIds,
+            });
+            if (response.data.status === 'success' || response.data.status === true) {
+                toast.success('Xoá các bản ghi thành công');
+                setSelectedIds([]);
+                fetchCatalogues();
+            }
+        } catch (error) {
+            toast.error('Xoá các bản ghi thất bại');
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchCatalogues();
     }, []);
@@ -130,7 +148,12 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-2">
                                 {selectedIds.length > 0 && (
-                                    <Button variant="outline" size="sm" className="h-9 rounded-[5px] text-rose-600 border-rose-200 hover:bg-rose-50">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="h-9 rounded-[5px] text-rose-600 border-rose-200 hover:bg-rose-50"
+                                        onClick={handleBulkDelete}
+                                    >
                                         Xoá {selectedIds.length} mục đã chọn
                                     </Button>
                                 )}

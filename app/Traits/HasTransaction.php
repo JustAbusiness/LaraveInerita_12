@@ -34,15 +34,25 @@ trait HasTransaction
     }
 
     protected function beforeDelete(int $id): static
-    { 
+    {
         $this->findById($id);
         $this->result = $this->model;
-        return $this; 
+        return $this;
     }
-
+ 
     protected function afterDelete(): static
     {
         return $this;
+    }
+
+    protected function beforeBulkDestroy(): static
+    { 
+        return $this;
+    }
+
+    protected function afterBulkDestroy(): static
+    {
+        return $this; 
     }
 
     protected function withRelation(): static
@@ -51,7 +61,7 @@ trait HasTransaction
         if (count($relationable)) {
             foreach ($relationable as $relation) {
                 if ($this->request->has($relation)) {
-                    $this->model->{$relation}()->sync($this->request->{$relation})  ;
+                    $this->model->{$relation}()->sync($this->request->{$relation});
                 }
             }
         }

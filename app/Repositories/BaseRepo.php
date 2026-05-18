@@ -50,7 +50,7 @@ class BaseRepo
             ->complexFilter($specs['filter']['complex'] ?? [])
             ->dateFilter($specs['filter']['date'] ?? [])
             ->simpleFilter($specs['filter']['simple'] ?? []);
-        
+
         $query->when(!empty($specs['sort']), function ($query) use ($specs) {
             return $query->orderBy($specs['sort'][0], $specs['sort'][1] ?? 'asc');
         });
@@ -58,5 +58,10 @@ class BaseRepo
         return $specs['all']
             ? $query->get()
             : $query->paginate($specs['perpage'] ?? 15)->withQueryString();
+    }
+
+    public function bulkDestroy(array $ids = [], ?bool $foreceDelete = false)
+    {
+        return $foreceDelete ? $this->model->whereIn('id', $ids)->forceDelete() : $this->model->whereIn('id', $ids)->delete();
     }
 }
