@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Traits\HasGenerate;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 class GenerateSingleModule extends Command
 {
@@ -60,7 +61,11 @@ class GenerateSingleModule extends Command
                 ->setNamespace($this->option('namespace'))
                 ->setVersion($this->option('ver'))
                 ->setTable($this->option('table'))
-                ->generateController();
+                ->generateModel()
+                ->generateController()
+                ->generateRequest()
+                ->generateService()
+                ->generateRepository();
 
             return \Symfony\Component\Console\Command\Command::SUCCESS;
         } catch (\Throwable $th) {
@@ -68,4 +73,24 @@ class GenerateSingleModule extends Command
             return \Symfony\Component\Console\Command\Command::FAILURE;
         }
     }
+
+    private function generateRequest(): static
+    {
+        $target = app_path("Http/Requests/{$this->namespace}/{$this->module}");
+        $stub =  [
+            'bulk-destroy-request' => 'BulkDestroyRequest',
+            'bulk-update-request' => 'BulkUpdateRequest',
+            'store-request' => 'StoreRequest' ,
+            'update-request' => 'UpdateRequest'
+        ]; 
+
+        foreach ($stub as $key => $stub) {
+            $stubContent = $this->getStubs("common/{$key}");
+            $description = "{$target}/{$stub}.php";
+            $content = $this->getContent($stubContent);
+            File::ensureDirectoryExists($target);
+            $this->put($description, $content);
+        }     
+        return $this;
+    } 
 }

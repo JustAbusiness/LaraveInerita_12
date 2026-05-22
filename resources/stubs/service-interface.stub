@@ -1,0 +1,10 @@
+<?php
+
+namespace App\Services\Interfaces\{{namespace}};
+
+use App\Services\Interfaces\BaseServiceInteface;
+
+interface {{module}}ServiceInterface extends BaseServiceInteface
+{
+
+}
