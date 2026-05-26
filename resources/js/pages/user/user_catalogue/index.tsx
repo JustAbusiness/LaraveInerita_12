@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomCard from '@/components/ui/custom-card';
@@ -6,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes/index';
 import { type BreadcrumbItem, type PageConfig } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { PlusCircle, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Loader2, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -43,13 +44,17 @@ export default function Dashboard() {
     const [catalogues, setCatalogues] = useState<UserCatalogue[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchCatalogues = async () => {
+    const fetchCatalogues = async (searchQuery = '') => {
         try {
             setLoading(true);
-            const response = await api.get('/user_catalogue');
+            const response = await api.get('/user_catalogue', {
+                params: {
+                    keyword: searchQuery || undefined
+                }
+            });
             if (response.data.status === 'success') {
-                // Assuming paginated response: data.data.data
                 setCatalogues(response.data.data.data || []);
             }
         } catch (error) {
@@ -67,7 +72,7 @@ export default function Dashboard() {
             const response = await api.delete(`/user_catalogue/${id}`);
             if (response.data.status === 'success') {
                 toast.success('Xoá bản ghi thành công');
-                fetchCatalogues();
+                fetchCatalogues(searchTerm);
             }
         } catch (error) {
             toast.error('Xoá bản ghi thất bại');
@@ -116,7 +121,7 @@ export default function Dashboard() {
             if (response.data.status === 'success' || response.data.status === true) {
                 toast.success('Xoá các bản ghi thành công');
                 setSelectedIds([]);
-                fetchCatalogues();
+                fetchCatalogues(searchTerm);
             }
         } catch (error) {
             toast.error('Xoá các bản ghi thất bại');
@@ -125,8 +130,12 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
-        fetchCatalogues();
-    }, []);
+        const delayDebounceFn = setTimeout(() => {
+            fetchCatalogues(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -143,8 +152,20 @@ export default function Dashboard() {
                         className="bg-white border-zinc-200 shadow-sm"
                     >
                         <div className="mb-[20px] flex items-center justify-between">
-                            <div className="text-sm font-medium text-zinc-500"> 
-                                {loading ? 'Đang tải...' : `Tổng số: ${catalogues.length} bản ghi`}
+                            <div className="flex items-center gap-4">
+                                <div className="text-sm font-medium text-zinc-500 min-w-[120px]"> 
+                                    {loading ? 'Đang tải...' : `Tổng số: ${catalogues.length} bản ghi`}
+                                </div>
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Tìm kiếm theo tên, từ khoá..."
+                                        className="w-[300px] pl-9 text-black"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 {selectedIds.length > 0 && (

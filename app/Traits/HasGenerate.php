@@ -99,4 +99,20 @@ trait HasGenerate
         $this->put($destination, $content);
         return $this;
     }
+
+    private function generateMigration(): static
+    {
+        $stub = $this->getStubs('migration');
+        $target = database_path("migrations");
+        
+        $timestamp = date('Y_m_d_His');
+        $filename = "{$timestamp}_create_{$this->table}_table.php";
+        $destination = "{$target}/{$filename}";
+        
+        File::ensureDirectoryExists($target);
+
+        $content = $this->getContent($stub);
+        $this->put($destination, $content);
+        return $this;
+    }
 }

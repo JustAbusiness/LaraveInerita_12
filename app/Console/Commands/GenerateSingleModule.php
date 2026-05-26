@@ -65,7 +65,8 @@ class GenerateSingleModule extends Command
                 ->generateController()
                 ->generateRequest()
                 ->generateService()
-                ->generateRepository();
+                ->generateRepository()
+                ->generateMigration();
 
             return \Symfony\Component\Console\Command\Command::SUCCESS;
         } catch (\Throwable $th) {
