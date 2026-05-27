@@ -13,13 +13,13 @@ class GenerateSingleModule extends Command
     private $namespace;
     private $version;
     private $table;
-
+    private $moduleName;
     /**
      * The name and signature of the console command.
      *
-     * @var string
+     * @var string 
      */
-    protected $signature = 'make:crud {module} {--namespace=} {--ver=} {--table=}';
+    protected $signature = 'make:crud {module} {--namespace=} {--ver=} {--table=} {--moduleName=}';
     /**
      * The console command description. 
      *
@@ -51,6 +51,12 @@ class GenerateSingleModule extends Command
         return $this;
     }
 
+    protected function setModuleName(string $moduleName = ''): static
+    {
+        $this->moduleName = $moduleName;
+        return $this;
+    }
+
     /**
      * Execute the console command. 
      */
@@ -61,12 +67,14 @@ class GenerateSingleModule extends Command
                 ->setNamespace($this->option('namespace'))
                 ->setVersion($this->option('ver'))
                 ->setTable($this->option('table'))
+                ->setModuleName($this->option('moduleName'))
                 ->generateModel()
                 ->generateController()
                 ->generateRequest()
                 ->generateService()
                 ->generateRepository()
                 ->generateMigration();
+                // ->generatePermissionData();
 
             return \Symfony\Component\Console\Command\Command::SUCCESS;
         } catch (\Throwable $th) {
@@ -91,7 +99,7 @@ class GenerateSingleModule extends Command
             $content = $this->getContent($stubContent);
             File::ensureDirectoryExists($target);
             $this->put($description, $content);
-        }     
+        }      
         return $this;
     } 
 }

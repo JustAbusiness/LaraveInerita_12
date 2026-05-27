@@ -18,20 +18,20 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
     {
-        title: 'Danh sách nhóm thành viên',
-        href: '/',
+        title: 'Danh sách quyền',
+        href: '/permission',
     },
 ];
 
 const pageHeading: PageConfig = {
-    module: 'user_catalogue',
-    heading: 'Danh sách nhóm thông viên',
-    cardHeading: 'Bảng quản lý danh sách nhóm thông viên',
+    module: 'permission',
+    heading: 'Danh sách quyền',
+    cardHeading: 'Bảng quản lý danh sách quyền',
     cardDescription:
-        'Quản lý thông tin danh sách nhóm thông viên, sử dụng các chức năng để lọc dữ liệu',
+        'Quản lý thông tin danh sách quyền, sử dụng các chức năng để lọc dữ liệu',
 };
 
-interface UserCatalogue {
+interface Permission {
     id: number;
     name: string;
     canonical: string;
@@ -41,21 +41,21 @@ interface UserCatalogue {
 }
 
 export default function Dashboard() {
-    const [catalogues, setCatalogues] = useState<UserCatalogue[]>([]);
+    const [permissions, setPermissions] = useState<Permission[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchCatalogues = async (searchQuery = '') => {
+    const fetchPermissions = async (searchQuery = '') => {
         try {
             setLoading(true);
-            const response = await api.get('/user_catalogue', {
+            const response = await api.get(`/${pageHeading.module}`, {
                 params: {
                     keyword: searchQuery || undefined
                 }
             });
             if (response.data.status === 'success') {
-                setCatalogues(response.data.data.data || []);
+                setPermissions(response.data.data.data || []);
             }
         } catch (error) {
             toast.error('Không thể tải dữ liệu');
@@ -69,10 +69,10 @@ export default function Dashboard() {
         if (!confirm('Bạn có chắc chắn muốn xoá bản ghi này?')) return;
 
         try {
-            const response = await api.delete(`/user_catalogue/${id}`);
+            const response = await api.delete(`/${pageHeading.module}/${id}`);
             if (response.data.status === 'success') {
                 toast.success('Xoá bản ghi thành công');
-                fetchCatalogues(searchTerm);
+                fetchPermissions(searchTerm);
             }
         } catch (error) {
             toast.error('Xoá bản ghi thất bại');
@@ -83,13 +83,12 @@ export default function Dashboard() {
         const normalizedStatus = Number(currentStatus);
         const newStatus = normalizedStatus === 1 ? 2 : 1;
         try {
-            const response = await api.patch(`/user_catalogue/${id}`, {
+            const response = await api.patch(`/${pageHeading.module}/${id}`, {
                 publish: newStatus,
             });
             if (response.data.status === 'success') {
                 toast.success('Cập nhật trạng thái thành công');
-                // Optimistic update
-                setCatalogues(prev => prev.map(item => item.id === id ? { ...item, publish: newStatus } : item));
+                setPermissions(prev => prev.map(item => item.id === id ? { ...item, publish: newStatus } : item));
             }
         } catch (error) {
             toast.error('Cập nhật trạng thái thất bại');
@@ -98,10 +97,10 @@ export default function Dashboard() {
     };
 
     const toggleSelectAll = () => {
-        if (selectedIds.length === catalogues.length) {
+        if (selectedIds.length === permissions.length) {
             setSelectedIds([]);
         } else {
-            setSelectedIds(catalogues.map(item => item.id));
+            setSelectedIds(permissions.map(item => item.id));
         }
     };
 
@@ -115,13 +114,13 @@ export default function Dashboard() {
         if (!confirm(`Bạn có chắc chắn muốn xoá ${selectedIds.length} bản ghi đã chọn?`)) return;
 
         try {
-            const response = await api.post(`/user_catalogue/bulk-destroy`, {
+            const response = await api.post(`/${pageHeading.module}/bulk-destroy`, {
                 ids: selectedIds,
             });
             if (response.data.status === 'success' || response.data.status === true) {
                 toast.success('Xoá các bản ghi thành công');
                 setSelectedIds([]);
-                fetchCatalogues(searchTerm);
+                fetchPermissions(searchTerm);
             }
         } catch (error) {
             toast.error('Xoá các bản ghi thất bại');
@@ -131,7 +130,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
-            fetchCatalogues(searchTerm);
+            fetchPermissions(searchTerm);
         }, 500);
 
         return () => clearTimeout(delayDebounceFn);
@@ -139,7 +138,7 @@ export default function Dashboard() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Quản lý nhóm thành viên" />
+            <Head title="Quản lý quyền" />
             <div className="page-wrapper flex h-full flex-1 flex-col gap-4 overflow-x-auto bg-zinc-50/50">
                 <CustomPageHeading heading="" breadcrumbs={breadcrumbs} />
 
@@ -154,7 +153,7 @@ export default function Dashboard() {
                         <div className="mb-[20px] flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="text-sm font-medium text-zinc-500 min-w-[120px]"> 
-                                    {loading ? 'Đang tải...' : `Tổng số: ${catalogues.length} bản ghi`}
+                                    {loading ? 'Đang tải...' : `Tổng số: ${permissions.length} bản ghi`}
                                 </div>
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
@@ -195,12 +194,12 @@ export default function Dashboard() {
                                     <tr className="border-b border-zinc-200">
                                         <th className="h-12 px-4 text-center align-middle">
                                             <Checkbox 
-                                                checked={catalogues.length > 0 && selectedIds.length === catalogues.length}
+                                                checked={permissions.length > 0 && selectedIds.length === permissions.length}
                                                 onCheckedChange={toggleSelectAll}
                                             />
                                         </th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">ID</th>
-                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Tên nhóm</th>
+                                        <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Tên quyền</th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Từ khoá</th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Mô tả</th>
                                         <th className="h-12 px-4 text-left align-middle font-bold text-zinc-900 uppercase tracking-wider text-[11px]">Ngày tạo</th>
@@ -218,8 +217,8 @@ export default function Dashboard() {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ) : catalogues.length > 0 ? (
-                                        catalogues.map((item) => (
+                                    ) : permissions.length > 0 ? (
+                                        permissions.map((item) => (
                                             <tr key={item.id} className="border-b border-zinc-100 transition-colors hover:bg-zinc-50/50 bg-white">
                                                 <td className="p-4 text-center align-middle">
                                                     <Checkbox 
@@ -286,4 +285,3 @@ export default function Dashboard() {
         </AppLayout>
     );
 }
-

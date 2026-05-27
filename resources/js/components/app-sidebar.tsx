@@ -32,6 +32,10 @@ const mainNavItems: NavItem[] = [
                 url: '/user_catalogue ',
             },
             {
+                title: 'Quyền',
+                url: '/permission',
+            },
+            {
                 title: 'Thành Viên',
                 url: '/user',
             },

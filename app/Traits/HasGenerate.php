@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 trait HasGenerate
@@ -27,6 +29,7 @@ trait HasGenerate
                 '{{module}}',
                 '{{version}}',
                 '{{table}}',
+                '{{moduleName}}',
                 ...(isset($extend[0])) ? $extend[0] : [],
             ],
             [
@@ -34,6 +37,7 @@ trait HasGenerate
                 $this->module,
                 $this->version,
                 $this->table,
+                $this->moduleName,
                 ...(isset($extend[1])) ? $extend[1] : [],
             ],
             $content
@@ -114,5 +118,61 @@ trait HasGenerate
         $content = $this->getContent($stub);
         $this->put($destination, $content);
         return $this;
+    }
+
+    private function generatePermissionData(): static
+    {
+        try {
+            DB::beginTransaction();
+            $snake_module = Str::snake($this->module);
+            $display_name = $this->moduleName ?? $snake_module;
+            
+            $permissions = [
+                [
+                    'name' => $display_name . '.index',
+                    'description' => 'Xem danh sách ' . $display_name,
+                    'canonical' => $snake_module . '.index',
+                    'publish' => 2,
+                    'user_id' => 33,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'name' => $display_name . '.store', 
+                    'description' => 'Thêm mới ' . $display_name,
+                    'canonical' => $snake_module . '.store',
+                    'publish' => 2,
+                    'user_id' => 33,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'name' => $display_name . '.update',
+                    'description' => 'Cập nhật ' . $display_name,
+                    'canonical' => $snake_module . '.update', 
+                    'publish' => 2,
+                    'user_id' => 33,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'name' => $display_name . '.destroy',
+                    'description' => 'Xóa ' . $display_name,
+                    'canonical' => $snake_module . '.destroy',
+                    'publish' => 2,
+                    'user_id' => 33,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+             ];
+
+            
+            DB::table('permissions')->insertOrIgnore($permissions);   
+            DB::commit();
+            return $this;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 }
